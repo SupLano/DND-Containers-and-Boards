@@ -1,113 +1,250 @@
-import Image from 'next/image'
+"use client"
+import { PlusSquareIcon } from 'lucide-react'
+import { useMemo, useState } from 'react'
+import { Column, ID, Task } from '@/types/types'
+import ColumnContainer from '@/components/ColumnContainer'
+import { DndContext, DragEndEvent, DragOverEvent, DragOverlay, DragStartEvent, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
+import { SortableContext, arrayMove, arraySwap } from '@dnd-kit/sortable'
+import { createPortal } from 'react-dom'
+import TaskCard from '@/components/TaskCard'
+
 
 export default function Home() {
-  return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">app/page.tsx</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
 
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 before:lg:h-[360px] z-[-1]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
 
-      <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
+  const [columns, setColumns] = useState<Column[]>([])
 
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
+  const [activeColumn, setActiveColumn] = useState<Column | null>()
+  const columnsID = useMemo(() => columns.map(column => column.Id), [columns])
 
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Explore starter templates for Next.js.
-          </p>
-        </a>
 
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
+  const [tasks, setTasks] = useState<Task[]>([])
+  const [activeTask, setActiveTask] = useState<Task | null>()
+
+
+  function deleteTask (id: ID){
+    const taskIndex = tasks.findIndex(task => task.ID  === id)
+    const newTasks = tasks.filter((item, index) => index !== taskIndex);
+    setTasks(newTasks)
+  }
+
+  function setTaskContent(id: ID, text: ID){
+    const newTasks = tasks.map(
+      task => 
+       {
+         if (task.ID !== id) {return task}
+         return {...task, content:text as string }
+       } )
+       setTasks(newTasks)    
+    
+  }
+  
+
+  function createNewColumn(){
+
+    const columnToAdd : Column = {
+      Id: Math.floor(Math.random() * 100001),
+      title: `Column ${columns.length + 1}`
+    }
+
+    setColumns([...columns, columnToAdd])
+    // console.log(columns)
+
+  }
+
+  function updateColumn(id: ID, value: string) {
+      const newColumns = columns.map(
+        column => 
+         {
+           if (column.Id !== id) {return column}
+           return {...column, title:value}
+         } )
+         setColumns(newColumns)         
+  }
+
+  function deleteColumn(id: ID){
+    const newTasks = tasks.filter(task => task.columnId !== id )
+    setTasks(newTasks)
+    const newColumns = columns.filter(column => column.Id !== id)
+    setColumns(newColumns)
+    
+  }
+
+  function createTask(id: ID){
+    const newTask: Task = {
+      ID: Math.floor(Math.random() * 100001),
+      columnId: id,
+      content: 'Task ' + tasks.length
+    }
+    setTasks([...tasks, newTask])
+    // console.log(tasks)
+  }
+
+  function Dragging(event: DragStartEvent){
+    // console.log(event) 
+    if (event.active.data.current?.type === 'Column') {
+      setActiveColumn(event.active.data.current.column)
+    }
+    if (event.active.data.current?.type === 'Task'){
+      setActiveTask(event.active.data.current.Task)
+    }
+    return
+  }
+
+  function Dropping(event: DragEndEvent){
+    setActiveColumn(null)
+    setActiveTask(null)
+    const {active, over} = event
+    if(!over){
+      return
+    }
+    const activeColumnId = active.id
+    const overColumnId = over.id
+
+    if (activeColumnId == overColumnId) return
+    setColumns(columns => {
+      const activeColumnIndex = columns.findIndex(column => column.Id == activeColumnId)
+      const overColumnIndex = columns.findIndex(column => column.Id == overColumnId)
+      return arrayMove(columns, activeColumnIndex, overColumnIndex)
+    } )
+  }
+
+  // function DragOver(event: DragOverEvent){
+  //   const {active, over} = event
+    
+  //   if(!over){
+  //     return
+  //   }
+  //   const activeId = active.id
+  //   const overId = over.id
+
+  //   if (activeId == overId) return
+
+  //   const isActiveType =  active.data.current?.type
+  //   const isOverType =  over.data.current?.type
+  //   console.log({active: active.data})
+  //   console.log({over: over.data})
+
+  //   if (isActiveType !== 'Task'){ return }
+
+  //   const activeIndex = tasks.findIndex(task => task.ID == activeId)
+  //   const overIndex = tasks.findIndex(task => task.ID == overId)
+
+  //   //task task (same column)
+  //   //task task (different column)
+  //   //task column (different column)
+
+  //  if  ((isActiveType == 'Task' && isOverType == 'Task') && (tasks[activeIndex].columnId == tasks[overIndex].columnId)){
+  //    const newTaskArray = arrayMove(tasks, activeIndex, overIndex)
+  //    setTasks(newTaskArray)
+  //    return
+  //  }
+
+  //  if  ((isActiveType == 'Task' && isOverType == 'Task') && (tasks[activeIndex].columnId !== tasks[overIndex].columnId)){
+  //   const newTaskArray = arrayMove(tasks, activeIndex, overIndex)
+  //   setTasks(newTaskArray)
+  //   return
+  // }
+
+  //  if ((isActiveType == 'Task' && isOverType == 'Column') && (tasks[activeIndex].columnId !== overId)){
+  //     tasks[activeIndex].columnId = over.data.current?.column.Id
+  //     setColumns( columns => columns )
+  //     return
+  //  }
+
+  // }
+
+  function DragOver (event: DragOverEvent){
+
+    const { active, over } = event;
+    if (!over) return;
+
+    const activeId = active.id;
+    const overId = over.id;
+
+    if (activeId === overId) return;
+
+    const isActiveATask = active.data.current?.type === "Task";
+    const isOverATask = over.data.current?.type === "Task";
+
+    if (!isActiveATask) return;
+    const activeIndex = tasks.findIndex((task) => task.ID  === activeId);
+
+    // Im dropping a Task over another Task
+    
+    if (isActiveATask && isOverATask) {
+      setTasks((tasks) => {
+        const overIndex = tasks.findIndex((task) => task.ID === overId);
+        if (tasks[activeIndex].columnId != tasks[overIndex].columnId) {
+          // Fix introduced after video recording
+          tasks[activeIndex].columnId = tasks[overIndex].columnId;
+          return arrayMove(tasks, activeIndex, overIndex - 1); // Add this back Nonye
+        }
+        return arrayMove(tasks, activeIndex, overIndex);
+      });
+    }
+
+    const isOverAColumn = over.data.current?.type === "Column";
+
+    // Im dropping a Task over a column
+    if (isActiveATask && isOverAColumn) {
+      setTasks((tasks) => {
+        tasks[activeIndex].columnId = overId;
+        // console.log("DROPPING TASK OVER COLUMN", { activeIndex });
+        return arrayMove(tasks, activeIndex, activeIndex);
+      });
+    }
+  }
+
+
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 1,
+      }
+    })
   )
-}
+
+
+ 
+
+  return (
+   <DndContext onDragOver={DragOver} sensors={sensors} onDragStart={Dragging} onDragEnd={Dropping}>    
+      <div className='flex flex-col bg-blue-100 min-h-screen w-full justify-center items-center overflow-hidden '>
+      
+          <div className='px-4'>
+            <div className='flex flex-wrap p-5'>
+              <SortableContext items={columnsID}>
+                {columns.map(column => <ColumnContainer setTaskContent={setTaskContent} deleteTask={deleteTask} key={column.Id} createTask={createTask} updateColumn={updateColumn} deleteColumn={deleteColumn} column={column} tasks={tasks.filter(task => task.columnId == column.Id)}/> )}
+              </SortableContext>
+            </div>
+          </div>
+
+
+          <div onClick={ () => createNewColumn() } className='rounded-md drop-shadow-xl bg-blue-500 flex items-center justify-center text-center px-1 h-10'>
+            <p className='p-2'>Add Column</p>
+            <PlusSquareIcon  size={20}/>            
+          </div>
+        
+      </div>
+
+
+
+
+    {/* {createPortal(
+      <DragOverlay>
+        {activeColumn && <ColumnContainer tasks={tasks} deleteTask={deleteTask} setTaskContent={setTaskContent} createTask={createTask} updateColumn={updateColumn} column={activeColumn}  deleteColumn={deleteColumn}/>}
+      </DragOverlay>, document.body)
+    }  */}
+
+     {createPortal(
+      <DragOverlay>
+        {activeTask && <TaskCard deleteTask={deleteTask} setTaskContent={setTaskContent} content={activeTask.content} ID={activeTask.ID} columnId={activeTask.columnId}/>}
+      </DragOverlay>, document.body)
+    }
+
+   </DndContext>
+  )
+  }
+ 
