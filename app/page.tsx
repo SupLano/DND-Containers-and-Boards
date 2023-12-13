@@ -238,10 +238,10 @@ export default function Home() {
       </DragOverlay>, document.body)
     }  */}
 
-     {createPortal(
+     {
       <DragOverlay>
         {activeTask && <TaskCard deleteTask={deleteTask} setTaskContent={setTaskContent} content={activeTask.content} ID={activeTask.ID} columnId={activeTask.columnId}/>}
-      </DragOverlay>, document.body)
+      </DragOverlay>
     }
 
    </DndContext>

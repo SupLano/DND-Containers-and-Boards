@@ -1,3 +1,4 @@
+"use client"
 import React, { useMemo, useState } from 'react'
 import { Column, ID, Task } from '@/types/types'
 import { Delete, DeleteIcon, LucideDelete, PlusCircle, PlusIcon, Trash, TrashIcon } from 'lucide-react'
